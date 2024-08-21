@@ -19,7 +19,7 @@
             <table width="100%" style="border: 2px solid whitesmoke;padding: 20px;font-size: 14px">
               <tr >
                 <td><span>品牌:</span></td>
-                <template v-for="x in brand">
+                <template v-for="x in brands">
                   <td><el-link type="primary" @click="queryBrand(x)">{{x.brandName}}</el-link></td>
                 </template>
               </tr>
@@ -57,7 +57,7 @@
             <div style="float:left;width: 260px;height: 300px">
               <ul style="list-style-type: none">
                 <li>
-                  <a href="/productDetail">
+                  <a @click="toDetail(x)">
                     <img :src="require('../../assets/images/'+x.src)" width="220px" height="220px">
                   </a>
 
@@ -66,7 +66,7 @@
                   <ul style="list-style-type: none;font-size: 12px">
                     <li><el-tag type="danger">特卖价:{{x.price}}元</el-tag></li>
                     <li>
-                      <el-link style="font-size: 12px">{{x.title}}</el-link>
+                      <el-link style="font-size: 12px" @click="toDetail(x)">{{x.title}}</el-link>
                     </li>
 
                   </ul>
@@ -93,6 +93,7 @@
   import Header from "./myComponents/Header";
   import Search from "./myComponents/Search";
   import Footer from "./myComponents/Footer";
+  import {Result} from "element-ui";
     export default {
         name: "ProductClass",
         components:{
@@ -103,7 +104,7 @@
         data(){
            return{
                parameter:{ //请求查询参数
-                  proType:1,
+                  proType:0,
                   brandId:0, // 默认查询所有品牌
                   startPrice:0, // 默认查询价格（开始，低）
                   endPrice:0, // 默认查询价格（结束，高）
@@ -113,17 +114,35 @@
                   row:5
                },
                total:0,//总条数
-               type:"男装",
-               brand:[
-                 {"brandId":1,"brandName":"海澜之家"},
-                 {"brandId":2,"brandName":"七匹狼"},
-                 {"brandId":3,"brandName":"雅戈尔"},
-                 {"brandId":0,"brandName":"全部"},
-               ],//品牌
+
+               brands:[],//品牌
                imgGirl:[]//女装,
            }
         },
+      computed:{
+        type() {
+          if(this.parameter.proType==1){
+            return "男装";
+          }
+          if(this.parameter.proType==2){
+            return "女装";
+          }
+          if(this.parameter.proType==3){
+            return "鞋包";
+          }
+          if(this.parameter.proType==4){
+            return "内衣";
+          }
+          if(this.parameter.proType==5){
+            return "运动";
+          }
+        }
+      },
         methods:{
+          toDetail(x){//跳转到页面详情
+            localStorage.setItem("goodsId",x.goodsId);
+            window.location.href="/productDetail";
+          },
           queryOrderByPriceDesc(priceOrderDesc) { // 价格:从高到低
             this.parameter.priceOrderA = 0;
             this.parameter.priceOrderD = priceOrderDesc;
@@ -160,7 +179,7 @@
             this.$http.get("/goods/query",{params:this.parameter})
             .then(function (rs) {
                console.log(rs);
-               if(rs.data.code==200){
+               if(rs.data.code==200){//返回结果集
                   self.imgGirl = rs.data.data.list;
                   self.total = rs.data.data.total;
                }else{
@@ -168,9 +187,21 @@
                  self.imgGirl = [];
                }
             })
+            //品牌分类
+            this.$http.get("/brands/query",{params:this.parameter})
+              .then(function (rs) {
+                if(rs.data.code==200){
+                  self.brands = rs.data.data.list;
+                }else{
+                  //清空
+                  self.brands = [];
+                }
+              })
           }
       },
       mounted() {
+        // 获取商品分类的类型参数
+        this.parameter.proType = localStorage.getItem("type");
         this.queryOrderBy();
       }
 

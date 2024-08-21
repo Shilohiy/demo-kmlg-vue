@@ -113,9 +113,6 @@
                total:0,//总条数
                type:"男装",
                brand:[
-                 {"brandId":1,"brandName":"海澜之家"},
-                 {"brandId":2,"brandName":"七匹狼"},
-                 {"brandId":3,"brandName":"雅戈尔"},
                ],//品牌
                imgGirl:[]//女装,
            }
