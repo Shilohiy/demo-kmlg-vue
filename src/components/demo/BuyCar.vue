@@ -39,8 +39,7 @@
             <el-button
               size="mini"
               type="danger"
-              @click="handleDelete(scope.row.id)">删除</el-button>
-            <!-- @click="handleDelete(scope.$index, scope.row) -->
+              @click="handleDelete(scope.$index, scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -73,13 +72,14 @@
       }
     },
     methods:{
-      handleDelete(index){
+      handleDelete(index,row){  // 第一个参数index用法未知
         const self = this;
-        this.$http.get("/car/del",{params:{"id":index}})
+        const id = row.id;
+        this.$http.get("/car/del",{params:{"id":id}})
           .then(function (rs) {
               if(rs.data.code==200){
-                self.tableData = rs.data.data;
-                self.count();
+                self.queryMyCar(); // 使用queryMyCar刷新数据
+                self.$message("购物车数据删除成功")
               }else{
                 self.$message("购物车数据删除失败");
               }
