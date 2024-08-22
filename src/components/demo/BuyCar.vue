@@ -26,7 +26,7 @@
         <el-table-column label="单价" prop="price" width="100px"></el-table-column>
         <el-table-column label="购买数量" width="300px">
           <template slot-scope="scope">
-            <el-input-number v-model="scope.row.num" min="1" max="10" @change="count()"></el-input-number>
+            <el-input-number v-model="scope.row.num" :min="1" :max="10" @change="count()"></el-input-number>
           </template>
         </el-table-column>
         <el-table-column label="小计"  width="200px">
@@ -67,7 +67,12 @@
     data(){
       return{
         tableData:[],
-        totalPrice:0
+        totalPrice:0,
+        parameter:{ // 请求参数
+          list:[],
+          userId:"",
+          orderMoney:""
+        }
 
       }
     },
@@ -93,7 +98,23 @@
           }
       },
       toBuyCartwo(){
-        this.$router.push("/buyCarTwo");
+        // 获取购物车的编号
+        this.parameter.list=[];
+        for(var i=0;i<this.tableData.length;i++){
+          this.parameter.list.push(this.tableData[i].id);
+        }
+        this.parameter.userId = 1;
+        this.parameter.orderMoney=this.totalPrice;
+        const self = this;
+        this.$http.post("/order-info/add",this.parameter).
+        then(function (rs) {
+          self.$alert(rs.data.msg);
+          if(rs.data.code == 200){
+            self.$router.push("/buyCarTwo");
+          }
+
+        })
+        //this.$router.push("/buyCarTwo");
       },
       queryMyCar(){//查询我的购物车
         const self = this;
