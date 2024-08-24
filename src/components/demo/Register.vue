@@ -123,16 +123,16 @@ export default {
             this.$http.post("/user/register", this.form)
               .then((rs) => {
                 console.log('注册响应:', rs.data); // 打印后端响应
-                if (rs.data.message === "注册成功") {
-                  self.$message("注册成功");
+                if (rs.data.code === "200") {
+                  self.$message({ message: "注册成功", type: "success" });
                   self.$router.push('/login');
                 } else {
-                  self.$message("注册失败");
+                  self.$message({ message: rs.data.message, type: "error" });
                 }
               })
               .catch((error) => {
                 console.error('注册错误:', error); // 打印错误信息
-                self.$message("注册失败");
+                self.$message({ message: "注册失败", type: "error" });
               });
           }
         } else {
@@ -151,14 +151,14 @@ export default {
         .then((rs) => {
           console.log('验证码响应:', rs.data); // 打印后端响应
           if (rs.data === "Verification code sent successfully") {
-            this.$message("验证码已发送");
+            this.$message({ message: "验证码已发送", type: "success" });
           } else {
-            this.$message("发送验证码失败");
+            this.$message({ message: "发送验证码失败", type: "error" });
           }
         })
         .catch((error) => {
           console.error('发送验证码错误:', error); // 打印错误信息
-          this.$message("发送验证码失败");
+          this.$message({ message: "发送验证码失败", type: "error" });
         });
     }
   }
