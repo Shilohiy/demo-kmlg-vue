@@ -54,7 +54,7 @@
         rules: { //用户注册表单的验证规则
           userName: [ //用户验证
             {required: true, message: "请输入用户名", trigger: "blur"},//用户名不能为空的验证
-            {min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur'}//用户名长度的验证
+            {min: 1, max: 5, message: '长度在 1 到 5 个字符', trigger: 'blur'}//用户名长度的验证
           ],
           password: [ //密码验证
             {required: true, message: "请输入密码", trigger: "blur"},//密码不能为空的验证
@@ -67,8 +67,19 @@
       onSubmit:function (formName){ //注册
         const self = this;
         this.$refs[formName].validate((valid) => {
+
           if (valid) {
-            self.$message({message:'输入正确!',type:"success"});
+            this.$http.post("/user/login",this.form)
+              .then(function (rs) {
+                if(rs.data.code==200){
+                  self.$message("登录成功");
+                  // 跳转到index页面
+                  self.$router.push('/');
+                }else{
+                  self.$message("登录失败");
+                }
+              })
+            // self.$message({message:'输入正确!',type:"success"});
           } else {
             self.$message({message:'请输入正确的信息!',type:"warning"});
             return false;

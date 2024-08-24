@@ -32,3 +32,29 @@ new Vue({
   components: { App },
   template: '<App/>'
 })
+
+/* 定义一个导航钩子函数
+to:到达的下一个路由对象
+from:从那个路由来的路由对象
+next:想当于java的放行函数
+*/
+router.beforeEach(function(to,from,next){
+  //取出登录用户名，判断是否登录过
+  var userName = localStorage.getItem("userName");
+  console.log("userName="+userName)
+  console.log(to)
+  //判断路由地址里是否配置了meta的islogin
+  if(to.meta.isLogin){
+    if(userName==null){
+      next("/loginEle");
+    }else{
+      //允许访问
+      next()
+    }
+
+  }else{
+    //放行
+    next();
+  }
+
+})

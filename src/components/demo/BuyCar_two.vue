@@ -65,6 +65,12 @@
       </el-radio-group>
       <h1>订单附言</h1>
       <el-input type="textarea" placeholder="请输入订单附言" v-model="orderRemark"></el-input>
+      <!-- 二维码生成-->
+       <el-dialog :visible.sync="isShow" width="50%">
+             <div v-if="coderUrl">
+                <img :src="coderUrl" width="300" height="200">
+             </div>
+       </el-dialog>
 
        <div align="right">
          <br>
@@ -81,6 +87,7 @@
   import Header from "./myComponents/Header";
   import Search from "./myComponents/Search";
   import Footer from "./myComponents/Footer";
+  import QRCode from 'qrcode';
   export default {
     name: "buyCarTwo",
     components:{
@@ -90,6 +97,14 @@
     },
     data(){
       return{
+        parameter:{
+           orderId:"100",
+           money:"200",
+           title:"手机",
+           desc:"这是一个华为手机"
+        },
+        isShow:false,//是否显示二维码弹窗
+        coderUrl:"",//付款链接地址
         totalPrice:300,//总价
         tableData:[
           {"title":"上衣女短款秋季新款V领长袖微弹金属扣针织衫女上衣","price":100,"num":1,"sum":100},
@@ -113,49 +128,65 @@
         payPrice:350//应付金额
       }
     },
-    methods:{
-      changeInfo(){//收货人信息改变
-        const data =[
-          {name:"张三",postCode:6600,tel:15008266434,email:"4556677@qq.com",address:"成都市锦江区东光南二巷7号" },
-          {name:"李四",postCode:4600,tel:17228266434,email:"8555477@qq.com",address:"成都市武侯区红牌楼1号" }
+    methods: {
+      changeInfo() {//收货人信息改变
+        const data = [
+          {name: "张三", postCode: 6600, tel: 15008266434, email: "4556677@qq.com", address: "成都市锦江区东光南二巷7号"},
+          {name: "李四", postCode: 4600, tel: 17228266434, email: "8555477@qq.com", address: "成都市武侯区红牌楼1号"}
         ]
-        if (this.dataForm.name=="张三"){
+        if (this.dataForm.name == "张三") {
           this.dataForm = data[0]
-        }else{
+        } else {
           this.dataForm = data[1]
         }
       },
-      changePostPrice(){//配送方式信息改变
-            if(this.postType=="申通"){
-                this.stShow = true;
-                this.yjShow = false;
-                this.postPrice = 15
-            }else{
-              this.stShow = false;
-              this.yjShow = true;
-              this.postPrice = 5
-            }
-            //计算应付金额
-            this.payPrice = this.totalPrice+this.postPrice;
+      changePostPrice() {//配送方式信息改变
+        if (this.postType == "申通") {
+          this.stShow = true;
+          this.yjShow = false;
+          this.postPrice = 15
+        } else {
+          this.stShow = false;
+          this.yjShow = true;
+          this.postPrice = 5
+        }
+        //计算应付金额
+        this.payPrice = this.totalPrice + this.postPrice;
       },
-      sureOrder(){//确认订单
-           const info =  this.$confirm("你确定要付款"+this.payPrice+"元吗?","付款提示",{type:"warning"});
-           const self = this;
-           //确定触发事件
-           info.then(function () {
-              self.$message({message:"付款成功",type:"success"});
-              self.$router.push("/buyCarThree");
-           });
-           //取消触发事件
-           info.catch(function () {
-             self.$message({message:"取消付款",type:"warning"});
+      sureOrder() {//确认订单
+        const info = this.$confirm("你确定要付款" + this.payPrice + "元吗?", "付款提示", {type: "warning"});
+        const self = this;
+        //确定触发事件
+        info.then(function (){
+           //请求参数
+           self.$http.get("/order-info/getCode",{params:self.parameter})
+           .then(function (rs) {
+             console.log(rs.data)
+             self.generateQRCode(rs.data);
            })
 
 
+          // self.$message({message:"付款成功",type:"success"});
+          // self.$router.push("/buyCarThree");
+        });
+        //取消触发事件
+        info.catch(function () {
+          self.$message({message: "取消付款", type: "warning"});
+        })
+
+
+      },
+      async generateQRCode(text) {// 生成支付二维码
+        this.isShow = true;
+        try {
+          const url = await QRCode.toDataURL(text);
+          this.coderUrl = url;
+        } catch (error) {
+          console.error('生成二维码出错:', error);
+        }
+
       }
-
     }
-
   }
 </script>
 

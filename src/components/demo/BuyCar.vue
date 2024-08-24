@@ -57,6 +57,7 @@
   import Header from "./myComponents/Header";
   import Search from "./myComponents/Search";
   import Footer from "./myComponents/Footer";
+  import QRCode from 'qrcode';
   export default {
     name: "buyCar",
     components:{
